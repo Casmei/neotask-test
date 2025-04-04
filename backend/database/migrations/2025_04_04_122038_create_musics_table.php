@@ -14,8 +14,10 @@ return new class extends Migration {
             $table->id();
             $table->string("title");
             $table->string("youtube_id")->unique();
-            $table->integer("views")->default(0);
+            $table->unsignedBigInteger("views");
             $table->string("thumbnail");
+            $table->boolean("approved")->default(false);
+            $table->foreignId("user_id")->nullable()->constrained();
             $table->timestamps();
         });
     }

@@ -11,9 +11,17 @@ class Music extends Model
 
     protected $table = "musics";
 
-    protected $fillable = ["title", "youtube_id", "views", "thumbnail"];
+    protected $fillable = [
+        "title",
+        "youtube_id",
+        "views",
+        "thumbnail",
+        "approved",
+        "user_id",
+    ];
 
     protected $casts = [
+        "approved" => "boolean",
         "views" => "integer",
     ];
 }

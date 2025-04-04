@@ -29,6 +29,8 @@ class MusicRepository implements MusicRepositoryInterface
                 "title" => $music->getTitle(),
                 "views" => $music->getViews(),
                 "thumbnail" => $music->getThumbnail(),
+                "approved" => $music->isApproved(),
+                "user_id" => $music->getUserId(),
             ]
         );
 
@@ -56,7 +58,9 @@ class MusicRepository implements MusicRepositoryInterface
             $eloquentMusic->title,
             $eloquentMusic->youtube_id,
             $eloquentMusic->views,
-            $eloquentMusic->thumbnail
+            $eloquentMusic->thumbnail,
+            $eloquentMusic->approved,
+            $eloquentMusic->user_id
         );
     }
 
