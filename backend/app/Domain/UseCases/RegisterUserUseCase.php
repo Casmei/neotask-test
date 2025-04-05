@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Domain\UseCases;
 
-use App\Domain\Exceptions\UserAlreadyExistsException;
 use App\Domain\Models\User;
 use App\Domain\Repositories\Interfaces\UserRepositoryInterface;
 use App\Http\Requests\AuthRegisterRequest;

@@ -9,18 +9,39 @@ use Illuminate\Support\Collection;
 
 class MusicRepository implements MusicRepositoryInterface
 {
-    public function getTopMusics(): array
+    public function getMusics(array $filters = []): array
     {
-        $musics = EloquentMusic::where("approved", true)
-            ->orderBy("views", "desc")
-            ->get();
+        $query = EloquentMusic::query();
+
+        if (isset($filters["approved"])) {
+            $query->where("approved", $filters["approved"]);
+        }
+
+        if (isset($filters["orderBy"])) {
+            $query->orderBy(
+                $filters["orderBy"],
+                $filters["direction"] ?? "desc"
+            );
+        }
+
+        $limit = $filters["limit"] ?? 5;
+        $page = $filters["page"] ?? 1;
+        $offset = ($page - 1) * $limit;
+
+        $musics = $query->skip($offset)->take($limit)->get();
 
         return $this->mapToDomainModels($musics);
     }
 
-    public function getTotalCount(): int
+    public function getTotalCount(array $filters): int
     {
-        return EloquentMusic::where("approved", true)->count();
+        $query = EloquentMusic::query();
+
+        if (isset($filters["approved"])) {
+            $query->where("approved", $filters["approved"]);
+        }
+
+        return $query->count();
     }
 
     public function save(Music $music): Music
@@ -48,9 +69,6 @@ class MusicRepository implements MusicRepositoryInterface
         return $this->mapToDomainModel($music);
     }
 
-    /**
-     * Map Eloquent model to domain model
-     */
     private function mapToDomainModel(EloquentMusic $eloquentMusic): Music
     {
         $music = new Music(
@@ -67,9 +85,6 @@ class MusicRepository implements MusicRepositoryInterface
         return $music;
     }
 
-    /**
-     * Map collection of Eloquent models to array of domain models
-     */
     private function mapToDomainModels(Collection $eloquentMusics): array
     {
         return $eloquentMusics

@@ -33,6 +33,8 @@ class AuthController extends Controller
 
     /**
      * Register new user and create token
+     *
+     * @unauthenticated
      */
     public function register(AuthRegisterRequest $request): JsonResponse
     {
@@ -50,6 +52,8 @@ class AuthController extends Controller
 
     /**
      * Login user and create token
+     *
+     * @unauthenticated
      */
     public function login(AuthLoginRequest $request): JsonResponse
     {

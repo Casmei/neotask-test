@@ -7,18 +7,22 @@ use App\Domain\Models\Music;
 interface MusicRepositoryInterface
 {
     /**
-     * Get the top musics by views
+     * Get musics with pagination
      *
+     * @param int $limit
+     * @param int $page
+     * @param array $filters
      * @return array<Music>
      */
-    public function getTopMusics(): array;
+    public function getMusics(array $filters): array;
 
     /**
-     * Get total count of approved musics
+     * Get total count of musics
      *
+     * @param array $filters
      * @return int
      */
-    public function getTotalCount(): int;
+    public function getTotalCount(array $filters): int;
 
     /**
      * Save a new music
