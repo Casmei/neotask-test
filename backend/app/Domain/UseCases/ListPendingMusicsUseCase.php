@@ -3,9 +3,8 @@
 namespace App\Domain\UseCases;
 
 use App\Domain\Repositories\Interfaces\MusicRepositoryInterface;
+use App\Exceptions\UserFriendlyException;
 use App\Services\AuthService;
-use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class ListPendingMusicsUseCase
 {
@@ -31,9 +30,10 @@ class ListPendingMusicsUseCase
         $user = $this->authService->getAuthenticatedUser();
 
         if (!$user->getIsAdmin()) {
-            throw ValidationException::withMessages([
+            throw new UserFriendlyException(
                 "Você não tem permissão para acessar esta funcionalidade.",
-            ])->status(403);
+                403
+            );
         }
 
         $filters["approved"] = false;

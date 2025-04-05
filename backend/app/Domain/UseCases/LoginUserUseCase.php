@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace App\Domain\UseCases;
 
 use App\Domain\Repositories\Interfaces\UserRepositoryInterface;
+use App\Exceptions\UserFriendlyException;
 use App\Http\Requests\AuthLoginRequest;
 use App\Services\AuthService;
-use Illuminate\Validation\ValidationException;
 
 class LoginUserUseCase
 {
@@ -34,9 +34,7 @@ class LoginUserUseCase
         );
 
         if (!$isValidCredentials) {
-            throw ValidationException::withMessages([
-                "email" => ["Credenciais inválidas"],
-            ]);
+            throw new UserFriendlyException("Credenciais inválidas", 422);
         }
 
         $user = $this->userRepository->findByEmail($request["email"]);

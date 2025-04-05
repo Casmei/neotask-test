@@ -5,10 +5,10 @@ namespace App\Domain\UseCases;
 
 use App\Domain\Models\User;
 use App\Domain\Repositories\Interfaces\UserRepositoryInterface;
+use App\Exceptions\UserFriendlyException;
 use App\Http\Requests\AuthRegisterRequest;
 use App\Services\AuthService;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class RegisterUserUseCase
 {
@@ -31,9 +31,10 @@ class RegisterUserUseCase
     public function execute(AuthRegisterRequest $request)
     {
         if ($this->userRepository->findByEmail($request["email"])) {
-            throw ValidationException::withMessages([
-                "email" => ["Já existe um usuário com esse e-mail."],
-            ]);
+            throw new UserFriendlyException(
+                "Já existe um usuário com esse e-mail.",
+                422
+            );
         }
 
         $user = new User(

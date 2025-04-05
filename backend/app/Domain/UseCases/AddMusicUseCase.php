@@ -5,10 +5,10 @@ namespace App\Domain\UseCases;
 
 use App\Domain\Models\Music;
 use App\Domain\Repositories\Interfaces\MusicRepositoryInterface;
+use App\Exceptions\UserFriendlyException;
 use App\Services\YoutubeService;
 use App\Http\Requests\AddMusicRequest;
 use App\Services\AuthService;
-use Illuminate\Validation\ValidationException;
 
 class AddMusicUseCase
 {
@@ -29,10 +29,10 @@ class AddMusicUseCase
     /**
      * Execute the use case
      *
-     * @param AddMusicRequest
+     * @param array<AddMusicRequest>
      * @return Music
      */
-    public function execute(AddMusicRequest $request): Music
+    public function execute(array $request): Music
     {
         $user = $this->authService->getAuthenticatedUser();
 
@@ -40,10 +40,15 @@ class AddMusicUseCase
             $request["youtube_url"]
         );
 
+        if (!$musicId) {
+            throw new UserFriendlyException("URL do YouTube inválida", 403);
+        }
+
         if ($this->musicRepository->findByYoutubeId($musicId)) {
-            throw ValidationException::withMessages([
-                "youtube_url" => ["Está música já foi cadastrada."],
-            ]);
+            throw new UserFriendlyException(
+                "Esta música já foi cadastrada",
+                403
+            );
         }
 
         $musicInfo = $this->youtubeService->getVideoInfo($musicId);
