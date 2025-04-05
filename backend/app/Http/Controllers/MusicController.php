@@ -7,6 +7,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\MusicResource;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
+/**
+ * @group Music management
+ *
+ * APIs for managing Music
+ */
 class MusicController extends Controller
 {
     private ListTopMusicsUseCase $listTopMusicsUseCase;

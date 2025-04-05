@@ -1,13 +1,17 @@
-name: Endpoints
-description: ''
+name: 'Music management'
+description: |-
+
+  APIs for managing Music
 endpoints:
   -
     httpMethods:
       - GET
     uri: api/musics
     metadata:
-      groupName: Endpoints
-      groupDescription: ''
+      groupName: 'Music management'
+      groupDescription: |-
+
+        APIs for managing Music
       subgroup: ''
       subgroupDescription: ''
       title: 'Get list of top musics'
@@ -27,7 +31,7 @@ endpoints:
     responses:
       -
         status: 200
-        content: '{"data":[{"id":2,"title":"Qui sit velit.","youtube_id":"6BfFWdrasTk","views":400922,"formatted_views":"400.9K","thumbnail":"https:\/\/via.placeholder.com\/640x480.png\/00aacc?text=rerum","url":"https:\/\/www.youtube.com\/watch?v=6BfFWdrasTk"},{"id":5,"title":"Culpa aut eaque rerum.","youtube_id":"YC-FD3lX557","views":194036,"formatted_views":"194K","thumbnail":"https:\/\/via.placeholder.com\/640x480.png\/005511?text=id","url":"https:\/\/www.youtube.com\/watch?v=YC-FD3lX557"},{"id":1,"title":"Quasi beatae natus.","youtube_id":"wJIHuR-6PKF","views":163339,"formatted_views":"163.3K","thumbnail":"https:\/\/via.placeholder.com\/640x480.png\/00ee77?text=cum","url":"https:\/\/www.youtube.com\/watch?v=wJIHuR-6PKF"},{"id":3,"title":"Enim voluptas dolores ad.","youtube_id":"lHPoXD6qWKg","views":140273,"formatted_views":"140.3K","thumbnail":"https:\/\/via.placeholder.com\/640x480.png\/00cc99?text=eum","url":"https:\/\/www.youtube.com\/watch?v=lHPoXD6qWKg"},{"id":4,"title":"Ex et accusantium.","youtube_id":"kIWRSWd1cSO","views":89657,"formatted_views":"89.7K","thumbnail":"https:\/\/via.placeholder.com\/640x480.png\/00ff55?text=nulla","url":"https:\/\/www.youtube.com\/watch?v=kIWRSWd1cSO"}]}'
+        content: '{"data":[]}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json

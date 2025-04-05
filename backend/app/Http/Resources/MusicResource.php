@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Domain\Models\Music;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,7 +15,6 @@ class MusicResource extends JsonResource
      */
     public function toArray($request): array
     {
-        /** @var Music $this->resource */
         return [
             "id" => $this->resource->getId(),
             "title" => $this->resource->getTitle(),
