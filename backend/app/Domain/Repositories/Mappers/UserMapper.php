@@ -21,7 +21,9 @@ class UserMapper
             $eloquentUser->password
         );
 
-        return $domainUser->setId($eloquentUser->id);
-        return $domainUser->setIsAdmin($eloquentUser->admin);
+        $domainUser->setId($eloquentUser->id);
+        $domainUser->setIsAdmin((bool) $eloquentUser->admin);
+
+        return $domainUser;
     }
 }

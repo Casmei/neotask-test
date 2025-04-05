@@ -13,7 +13,6 @@ class Music
     private ?int $userId;
 
     public function __construct(
-        int $id,
         string $title,
         string $youtubeId,
         int $views,
@@ -21,7 +20,6 @@ class Music
         ?bool $approved = null,
         ?int $userId = null
     ) {
-        $this->id = $id;
         $this->title = $title;
         $this->youtubeId = $youtubeId;
         $this->views = $views;
@@ -33,6 +31,13 @@ class Music
     public function getId(): int
     {
         return $this->id;
+    }
+
+    public function setId(int $id): Music
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getTitle(): string

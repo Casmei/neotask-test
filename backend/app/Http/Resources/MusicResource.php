@@ -19,7 +19,6 @@ class MusicResource extends JsonResource
             "id" => $this->resource->getId(),
             "title" => $this->resource->getTitle(),
             "youtube_id" => $this->resource->getYoutubeId(),
-            "views" => $this->resource->getViews(),
             "formatted_views" => $this->formatViews(
                 $this->resource->getViews()
             ),

@@ -23,16 +23,14 @@ class MusicRepository implements MusicRepositoryInterface
 
     public function save(Music $music): Music
     {
-        $eloquentMusic = EloquentMusic::updateOrCreate(
-            ["youtube_id" => $music->getYoutubeId()],
-            [
-                "title" => $music->getTitle(),
-                "views" => $music->getViews(),
-                "thumbnail" => $music->getThumbnail(),
-                "approved" => $music->isApproved(),
-                "user_id" => $music->getUserId(),
-            ]
-        );
+        $eloquentMusic = EloquentMusic::create([
+            "title" => $music->getTitle(),
+            "views" => $music->getViews(),
+            "youtube_id" => $music->getYoutubeId(),
+            "thumbnail" => $music->getThumbnail(),
+            "approved" => $music->isApproved(),
+            "user_id" => $music->getUserId(),
+        ]);
 
         return $this->mapToDomainModel($eloquentMusic);
     }
@@ -53,8 +51,7 @@ class MusicRepository implements MusicRepositoryInterface
      */
     private function mapToDomainModel(EloquentMusic $eloquentMusic): Music
     {
-        return new Music(
-            $eloquentMusic->id,
+        $music = new Music(
             $eloquentMusic->title,
             $eloquentMusic->youtube_id,
             $eloquentMusic->views,
@@ -62,6 +59,10 @@ class MusicRepository implements MusicRepositoryInterface
             $eloquentMusic->approved,
             $eloquentMusic->user_id
         );
+
+        $music->setId($eloquentMusic->id);
+
+        return $music;
     }
 
     /**
