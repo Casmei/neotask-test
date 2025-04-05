@@ -22,5 +22,6 @@ class UserMapper
         );
 
         return $domainUser->setId($eloquentUser->id);
+        return $domainUser->setIsAdmin($eloquentUser->admin);
     }
 }

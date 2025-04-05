@@ -26,6 +26,7 @@ class AuthRegisterResource extends JsonResource
             "id" => $this->getId(),
             "name" => $this->getName(),
             "email" => $this->getEmail(),
+            "isAdmin" => $this->getIsAdmin(),
             "token" => $this->token,
             "message" => "Registro realizado com sucesso",
         ];

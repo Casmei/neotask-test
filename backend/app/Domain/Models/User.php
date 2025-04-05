@@ -8,6 +8,7 @@ class User
     private string $name;
     private string $email;
     private string $password;
+    private bool $isAdmin = false;
 
     public function __construct(string $name, string $email, string $password)
     {
@@ -40,5 +41,17 @@ class User
     public function getPassword(): string
     {
         return $this->password;
+    }
+
+    public function setIsAdmin(bool $isAdmin): User
+    {
+        $this->isAdmin = $isAdmin;
+
+        return $this;
+    }
+
+    public function getIsAdmin(): bool
+    {
+        return $this->isAdmin;
     }
 }
