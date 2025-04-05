@@ -3,15 +3,12 @@ declare(strict_types=1);
 
 namespace App\Domain\UseCases;
 
-use App\Domain\Exceptions\UserAlreadyExistsException;
-use App\Domain\Models\User;
 use App\Domain\Repositories\Interfaces\UserRepositoryInterface;
-use App\Http\Requests\AuthRegisterRequest;
+use App\Http\Requests\AuthLoginRequest;
 use App\Services\AuthService;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-class RegisterUserUseCase
+class LoginUserUseCase
 {
     private UserRepositoryInterface $userRepository;
     private AuthService $authService;
@@ -29,21 +26,20 @@ class RegisterUserUseCase
      *
      * @return array
      */
-    public function execute(AuthRegisterRequest $request)
+    public function execute(AuthLoginRequest $request)
     {
-        if ($this->userRepository->findByEmail($request["email"])) {
+        $isValidCredentials = $this->authService->checkValidCredential(
+            $request["email"],
+            $request["password"]
+        );
+
+        if (!$isValidCredentials) {
             throw ValidationException::withMessages([
-                "email" => ["Já existe um usuário com esse e-mail."],
+                "email" => ["Credenciais inválidas"],
             ]);
         }
 
-        $user = new User(
-            $request["name"],
-            $request["email"],
-            Hash::make($request["password"])
-        );
-
-        $this->userRepository->register($user);
+        $user = $this->userRepository->findByEmail($request["email"]);
         $token = $this->authService->generateToken($user);
 
         return [
