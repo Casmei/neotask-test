@@ -11,7 +11,9 @@ class MusicRepository implements MusicRepositoryInterface
 {
     public function getTopMusics(): array
     {
-        $musics = EloquentMusic::orderBy("views", "desc")->get();
+        $musics = EloquentMusic::where("approved", true)
+            ->orderBy("views", "desc")
+            ->get();
 
         return $this->mapToDomainModels($musics);
     }
