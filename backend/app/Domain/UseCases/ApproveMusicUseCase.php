@@ -7,7 +7,6 @@ use App\Domain\Models\Music;
 use App\Domain\Models\User;
 use App\Domain\Repositories\Interfaces\MusicRepositoryInterface;
 use App\Exceptions\UserFriendlyException;
-use App\Services\AuthService;
 
 class ApproveMusicUseCase
 {
@@ -42,9 +41,10 @@ class ApproveMusicUseCase
             );
         }
 
-        $music->setApproved();
-
-        $this->musicRepository->approve($music);
+        if (!$music->isApproved()) {
+            $music->setApproved();
+            $this->musicRepository->approve($music);
+        }
 
         return $music;
     }
