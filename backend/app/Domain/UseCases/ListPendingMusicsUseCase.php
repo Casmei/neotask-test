@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Domain\UseCases;
 
+use App\Domain\Models\User;
 use App\Domain\Repositories\Interfaces\MusicRepositoryInterface;
 use App\Exceptions\UserFriendlyException;
 use App\Services\AuthService;
@@ -23,12 +24,18 @@ class ListPendingMusicsUseCase
     /**
      * Execute the use case
      *
+     * @param User $user
      * @param array $filters
      * @return array
      */
-    public function execute(array $filters = []): array
+    public function execute(User $user, array $filters = []): array
     {
-        $user = $this->authService->isAdmin();
+        if (!$user->getIsAdmin()) {
+            throw new UserFriendlyException(
+                "Você não tem permissão para acessar está funcionalidade.",
+                403
+            );
+        }
 
         $filters["approved"] = false;
 

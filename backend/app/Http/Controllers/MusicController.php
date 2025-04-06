@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domain\Repositories\Mappers\UserMapper;
 use App\Domain\UseCases\AddMusicUseCase;
 use App\Domain\UseCases\ApproveMusicUseCase;
 use App\Domain\UseCases\ListApprovedMusicsUseCase;
@@ -13,6 +14,7 @@ use App\Http\Requests\ListMusicsRequest;
 use App\Http\Resources\MusicResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -66,7 +68,11 @@ class MusicController extends Controller
      */
     public function store(AddMusicRequest $request)
     {
-        $music = $this->addMusicUseCase->execute($request->validated());
+        $domainUser = UserMapper::toDomain(Auth::user());
+        $music = $this->addMusicUseCase->execute(
+            $domainUser,
+            $request->validated()
+        );
 
         return response()->json(
             new MusicResource($music),
@@ -80,7 +86,9 @@ class MusicController extends Controller
     public function getPendingMusics(
         ListMusicsRequest $request
     ): AnonymousResourceCollection {
+        $domainUser = UserMapper::toDomain(Auth::user());
         $result = $this->listPendingMusicsUseCase->execute(
+            $domainUser,
             $request->validated()
         );
 
@@ -101,7 +109,11 @@ class MusicController extends Controller
      */
     public function approve(int $musicId): JsonResponse
     {
-        $approvedMusic = $this->approveMusicUseCase->execute($musicId);
+        $domainUser = UserMapper::toDomain(Auth::user());
+        $approvedMusic = $this->approveMusicUseCase->execute(
+            $domainUser,
+            $musicId
+        );
 
         return response()->json(
             new MusicResource($approvedMusic),

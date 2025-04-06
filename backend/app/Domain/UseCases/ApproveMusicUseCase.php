@@ -4,35 +4,34 @@ declare(strict_types=1);
 namespace App\Domain\UseCases;
 
 use App\Domain\Models\Music;
+use App\Domain\Models\User;
 use App\Domain\Repositories\Interfaces\MusicRepositoryInterface;
 use App\Exceptions\UserFriendlyException;
-use App\Services\YoutubeService;
 use App\Services\AuthService;
-use Illuminate\Http\Request;
 
 class ApproveMusicUseCase
 {
     private MusicRepositoryInterface $musicRepository;
-    private AuthService $authService;
 
-    public function __construct(
-        MusicRepositoryInterface $musicRepository,
-        AuthService $authService
-    ) {
+    public function __construct(MusicRepositoryInterface $musicRepository)
+    {
         $this->musicRepository = $musicRepository;
-        $this->authService = $authService;
     }
 
     /**
      * Execute the use case
-     *
+     * @param User $user
      * @param int $musicId
      * @return Music
      */
-    public function execute(int $musicId): Music
+    public function execute(User $user, int $musicId): Music
     {
-        $this->authService->getAuthenticatedUser();
-        $this->authService->isAdmin();
+        if (!$user->getIsAdmin()) {
+            throw new UserFriendlyException(
+                "Você não tem permissão para acessar está funcionalidade.",
+                403
+            );
+        }
 
         $music = $this->musicRepository->findById($musicId);
 

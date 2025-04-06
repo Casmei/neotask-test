@@ -5,9 +5,7 @@ namespace App\Services;
 
 use App\Domain\Models\User as DomainUser;
 use App\Domain\Repositories\Mappers\UserMapper;
-use App\Exceptions\UserFriendlyException;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\UnauthorizedException;
 
 class AuthService
 {
@@ -26,28 +24,5 @@ class AuthService
         }
 
         return $isValidCredentials;
-    }
-
-    public function getAuthenticatedUser(): DomainUser
-    {
-        $eloquentUser = Auth::user();
-
-        if (!$eloquentUser) {
-            throw new UnauthorizedException("Usuário não autenticado.");
-        }
-
-        return UserMapper::toDomain($eloquentUser);
-    }
-
-    public function isAdmin()
-    {
-        $user = $this->getAuthenticatedUser();
-
-        if (!$user->getIsAdmin()) {
-            throw new UserFriendlyException(
-                "Você não tem permissão para acessar está funcionalidade.",
-                403
-            );
-        }
     }
 }
