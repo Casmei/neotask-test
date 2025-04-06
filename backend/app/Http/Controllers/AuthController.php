@@ -11,7 +11,6 @@ use App\Http\Requests\AuthRegisterRequest;
 use App\Http\Resources\AuthResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
-use Illuminate\Http\Request;
 
 /**
  * @group User management

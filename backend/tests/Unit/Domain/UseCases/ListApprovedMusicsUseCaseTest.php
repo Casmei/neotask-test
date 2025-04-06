@@ -4,10 +4,8 @@ namespace Tests\Unit\Domain\UseCases;
 
 use App\Domain\Repositories\Interfaces\MusicRepositoryInterface;
 use App\Domain\UseCases\ListApprovedMusicsUseCase;
-use App\Exceptions\UserFriendlyException;
 use PHPUnit\Framework\TestCase;
 use Tests\Factories\MusicFactory;
-use Tests\Factories\UserFactory;
 
 class ListApprovedMusicsUseCaseTest extends TestCase
 {
