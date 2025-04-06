@@ -6,19 +6,14 @@ namespace App\Domain\UseCases;
 use App\Domain\Models\User;
 use App\Domain\Repositories\Interfaces\MusicRepositoryInterface;
 use App\Exceptions\UserFriendlyException;
-use App\Services\AuthService;
 
 class ListPendingMusicsUseCase
 {
     private MusicRepositoryInterface $musicRepository;
-    private AuthService $authService;
 
-    public function __construct(
-        MusicRepositoryInterface $musicRepository,
-        AuthService $authService
-    ) {
+    public function __construct(MusicRepositoryInterface $musicRepository)
+    {
         $this->musicRepository = $musicRepository;
-        $this->authService = $authService;
     }
 
     /**
