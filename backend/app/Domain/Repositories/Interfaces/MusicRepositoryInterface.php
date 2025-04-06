@@ -33,10 +33,26 @@ interface MusicRepositoryInterface
     public function save(Music $music): Music;
 
     /**
+     * Save a new music
+     *
+     * @param Music $music
+     * @return void
+     */
+    public function approve(Music $music): void;
+
+    /**
      * Find music by YouTube ID
      *
      * @param string $youtubeId
      * @return Music|null
      */
     public function findByYoutubeId(string $youtubeId): ?Music;
+
+    /**
+     * Find music by Music ID
+     *
+     * @param int $$musicId
+     * @return Music|null
+     */
+    public function findById(int $musicId): ?Music;
 }

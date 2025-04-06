@@ -28,14 +28,7 @@ class ListPendingMusicsUseCase
      */
     public function execute(array $filters = []): array
     {
-        $user = $this->authService->getAuthenticatedUser();
-
-        if (!$user->getIsAdmin()) {
-            throw new UserFriendlyException(
-                "Você não tem permissão para acessar esta funcionalidade.",
-                403
-            );
-        }
+        $user = $this->authService->isAdmin();
 
         $filters["approved"] = false;
 

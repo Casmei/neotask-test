@@ -59,9 +59,27 @@ class MusicRepository implements MusicRepositoryInterface
         return $this->mapToDomainModel($eloquentMusic);
     }
 
+    public function approve(Music $music): void
+    {
+        EloquentMusic::where("id", $music->getId())->update([
+            "approved" => $music->isApproved(),
+        ]);
+    }
+
     public function findByYoutubeId(string $youtubeId): ?Music
     {
         $music = EloquentMusic::where("youtube_id", $youtubeId)->first();
+
+        if (!$music) {
+            return null;
+        }
+
+        return $this->mapToDomainModel($music);
+    }
+
+    public function findById(int $musicId): ?Music
+    {
+        $music = EloquentMusic::where("id", $musicId)->first();
 
         if (!$music) {
             return null;

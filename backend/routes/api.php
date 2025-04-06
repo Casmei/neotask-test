@@ -11,5 +11,6 @@ Route::post("/register", [AuthController::class, "register"]);
 
 Route::middleware("auth:sanctum")->group(function () {
     Route::post("/musics", [MusicController::class, "store"]);
-    Route::get("/musics/pending", [MusicController::class, "pending"]);
+    Route::get("/musics/pending", [MusicController::class, "getPendingMusics"]);
+    Route::patch("/musics/approve/{id}", [MusicController::class, "approve"]);
 });

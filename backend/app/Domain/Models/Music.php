@@ -66,6 +66,13 @@ class Music
         return $this->approved;
     }
 
+    public function setApproved(): Music
+    {
+        $this->approved = true;
+
+        return $this;
+    }
+
     public function getUserId(): ?int
     {
         return $this->userId;

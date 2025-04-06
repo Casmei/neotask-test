@@ -4,12 +4,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Domain\UseCases\AddMusicUseCase;
+use App\Domain\UseCases\ApproveMusicUseCase;
 use App\Domain\UseCases\ListApprovedMusicsUseCase;
 use App\Domain\UseCases\ListPendingMusicsUseCase;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AddMusicRequest;
 use App\Http\Requests\ListMusicsRequest;
 use App\Http\Resources\MusicResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -23,15 +25,18 @@ class MusicController extends Controller
     private ListApprovedMusicsUseCase $listApprovedMusicsUseCase;
     private ListPendingMusicsUseCase $listPendingMusicsUseCase;
     private AddMusicUseCase $addMusicUseCase;
+    private ApproveMusicUseCase $approveMusicUseCase;
 
     public function __construct(
         ListApprovedMusicsUseCase $listApprovedMusicsUseCase,
         ListPendingMusicsUseCase $listPendingMusicsUseCase,
-        AddMusicUseCase $addMusicUseCase
+        AddMusicUseCase $addMusicUseCase,
+        ApproveMusicUseCase $approveMusicUseCase
     ) {
         $this->listApprovedMusicsUseCase = $listApprovedMusicsUseCase;
         $this->addMusicUseCase = $addMusicUseCase;
         $this->listPendingMusicsUseCase = $listPendingMusicsUseCase;
+        $this->approveMusicUseCase = $approveMusicUseCase;
     }
 
     /**
@@ -72,7 +77,7 @@ class MusicController extends Controller
     /**
      * Get list of pending musics
      */
-    public function pending(
+    public function getPendingMusics(
         ListMusicsRequest $request
     ): AnonymousResourceCollection {
         $result = $this->listPendingMusicsUseCase->execute(
@@ -87,5 +92,20 @@ class MusicController extends Controller
                 "last_page" => $result["last_page"],
             ],
         ]);
+    }
+
+    /**
+     * Approve music
+     *
+     * @param int $musicId  The id of the song you want to approve
+     */
+    public function approve(int $musicId): JsonResponse
+    {
+        $approvedMusic = $this->approveMusicUseCase->execute($musicId);
+
+        return response()->json(
+            new MusicResource($approvedMusic),
+            Response::HTTP_OK
+        );
     }
 }
