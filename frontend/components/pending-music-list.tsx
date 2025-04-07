@@ -5,12 +5,14 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Check } from 'lucide-react'
-import { useAuth } from "@/hooks/use-auth"
 import MusicCard from "./music-card"
 import Pagination from "./pagination"
+import { musicGetPendingMusics } from "@/api-request/api"
+import { useSession } from "next-auth/react"
+import { approveMusicServerAction } from "@/action/approve-music"
 
 interface Music {
-  id: string
+  id: number
   title: string
   youtube_id: string
   formatted_views: string
@@ -35,139 +37,71 @@ export default function PendingMusicList({
 }: {
   onError: (error: string) => void
 }) {
-  const { user } = useAuth()
+  const { data: session, status } = useSession()
   const [pendingMusics, setPendingMusics] = useState<Music[]>([])
   const [meta, setMeta] = useState<PaginationMeta | null>(null)
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
-  const [approvingId, setApprovingId] = useState<string | null>(null)
 
   const fetchPendingMusics = async (page = 1) => {
-    if (!user?.token) return;
-  
-    setLoading(true);
-    onError("");
-  
-    try {
-      // Try to fetch from the API
-      const response = await fetch(
-        `http://localhost:8080/api/pending-musics?page=${page}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.token}`,
-          },
-        }
-      ).catch(err => {
-        console.log("Network error:", err);
-        return null;
-      });
+    setLoading(true)
 
-      // If the fetch failed or returned an error status, use mock data
-      if (!response || !response.ok) {
-        console.log("Using mock data due to API unavailability");
-      
-        // Mock data for development/preview
-        const mockData: MusicResponse = {
-          data: [
-            {
-              id: "101",
-              title: "Pending Music 1 - API Unavailable",
-              youtube_id: "dQw4w9WgXcQ",
-              formatted_views: "1.5M",
-              thumbnail: "/placeholder.svg?height=200&width=200",
-              url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-            },
-            {
-              id: "102",
-              title: "Pending Music 2 - API Unavailable",
-              youtube_id: "dQw4w9WgXcQ",
-              formatted_views: "800K",
-              thumbnail: "/placeholder.svg?height=200&width=200",
-              url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-            },
-            {
-              id: "103",
-              title: "Pending Music 3 - API Unavailable",
-              youtube_id: "dQw4w9WgXcQ",
-              formatted_views: "2.3M",
-              thumbnail: "/placeholder.svg?height=200&width=200",
-              url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-            }
-          ],
-          meta: {
-            total: "3",
-            current_page: page.toString(),
-            per_page: "10",
-            last_page: "1"
-          }
-        };
-      
-        setPendingMusics(mockData.data);
-        setMeta(mockData.meta);
-        setCurrentPage(page);
-        return;
+    try {
+      const response = await musicGetPendingMusics({ page, orderBy: "views" }, {
+        headers: {
+          Authorization: `Bearer ${session?.accessToken}`
+        },
+        next: {
+          tags: ['pendingMusic']
+        },
+
+      }).catch((err) => {
+        console.log("Network error:", err)
+        return null
+      })
+
+      if (!response || response.status !== 200) {
+        onError("Failed to load music list. Please try again later.")
+        setPendingMusics([])
+        setMeta(null)
+        return
       }
 
-      const data: MusicResponse = await response.json();
-      setPendingMusics(data.data);
-      setMeta(data.meta);
-      setCurrentPage(parseInt(data.meta.current_page));
+      const data = response.data as MusicResponse
+
+      setPendingMusics(data.data)
+      setMeta(data.meta)
+      setCurrentPage(Number.parseInt(data.meta.current_page.toString()))
     } catch (err) {
-      console.error("Error fetching pending musics:", err);
-      onError("Failed to load pending music list. Please try again later.");
-    
-      // Set empty data instead of leaving previous data
-      setPendingMusics([]);
-      setMeta(null);
+      console.error("Error fetching musics:", err)
+      setPendingMusics([])
+      setMeta(null)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   };
 
   useEffect(() => {
-    if (user?.token) {
+    if (session?.accessToken) {
       fetchPendingMusics()
     }
-  }, [user])
+  }, [session])
 
   const handlePageChange = (page: number) => {
     fetchPendingMusics(page)
   }
 
-  const approveMusic = async (id: string) => {
-    if (!user?.token) return
+  const approveMusic = async (musicId: number) => {
+    if (status === "unauthenticated" || !session?.accessToken) {
+      return
+    }
 
-    setApprovingId(id)
+    const accessToken = session.accessToken
 
     try {
-      const response = await fetch(`http://localhost:8080/api/musics/${id}/approve`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-      }).catch(err => {
-        console.log("Network error:", err);
-        return null;
-      });
-
-      // If the API is unavailable, simulate approval
-      if (!response || !response.ok) {
-        console.log("API unavailable, simulating approval");
-        // Remove the approved music from the list
-        setPendingMusics(pendingMusics.filter((music) => music.id !== id));
-        return;
-      }
-
-      // Remove the approved music from the list
-      setPendingMusics(pendingMusics.filter((music) => music.id !== id))
+      await approveMusicServerAction({ musicId, accessToken });
     } catch (err) {
-      console.error("Error approving music:", err)
       onError("Failed to approve music. Please try again.")
-    } finally {
-      setApprovingId(null)
     }
   }
 
@@ -211,17 +145,13 @@ export default function PendingMusicList({
                     <div className="p-4 border-t sm:border-t-0 sm:border-l flex items-center justify-center">
                       <Button
                         onClick={() => approveMusic(music.id)}
-                        disabled={approvingId === music.id}
                         className="w-full sm:w-auto"
                       >
-                        {approvingId === music.id ? (
-                          "Approving..."
-                        ) : (
-                          <>
-                            <Check className="h-4 w-4 mr-2" />
-                            Approve
-                          </>
-                        )}
+
+                        <>
+                          <Check className="h-4 w-4 mr-2" />
+                          Approve
+                        </>
                       </Button>
                     </div>
                   </div>

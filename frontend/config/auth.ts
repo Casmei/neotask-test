@@ -16,14 +16,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       authorize: async (credentials) => {
         const { email: formEmail, password: formPassword } = await loginSchema.parseAsync(credentials)
 
-        const { id, email, isAdmin, name, token } = await authLogin({
+        const response = await authLogin({
           email: formEmail,
           password: formPassword
-        });
+        })
 
+        if (response.status !== 200) {
+          // Aqui você pode lançar um erro para o NextAuth tratar
+          throw new Error('Credenciais inválidas')
+        }
+
+        const { id, email, isAdmin, name, token } = response.data
 
         return { id, email, isAdmin, name, token }
-      },
+      }
     }),
   ],
   pages: {

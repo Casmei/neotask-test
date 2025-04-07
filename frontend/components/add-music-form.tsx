@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { musicStore } from "@/api-request/api"
+import { addMusicServerAction } from "@/action/add-music"
 
 
 const formSchema = z.object({
@@ -42,18 +42,18 @@ export default function AddMusicForm() {
     if (!session) return
 
     try {
-      const response = await musicStore({ youtube_url: data.youtubeUrl }, {
-        headers: {
-          Authorization: `Bearer ${session.accessToken ?? ""}`
-        }
+      const response = await addMusicServerAction({
+        youtube_url: data.youtubeUrl,
+        accessToken: session?.accessToken ?? ""
       })
 
-      if (!response) {
-        setSuccess("Music added successfully! (mock)")
-      } else {
-        setSuccess("Music added successfully! It will be reviewed by an admin.")
+      if (response.status == 201) {
+        const message = "Música adicionada com sucesso!";
+        const approvalMessage = session.user?.isAdmin ? "" : " Será analisado por um administrador.";
+        setSuccess(`${message} ${approvalMessage}`)
       }
 
+      reset();
     } catch (err) {
       console.error("Error:", err)
     }

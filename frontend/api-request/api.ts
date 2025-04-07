@@ -9,102 +9,342 @@ import type {
   AuthLoginRequest,
   AuthRegisterRequest,
   AuthResource,
+  AuthenticationExceptionResponse,
+  AuthorizationExceptionResponse,
   MusicGetPendingMusics200,
   MusicGetPendingMusicsParams,
   MusicIndex200,
   MusicIndexParams,
-  MusicResource
+  MusicResource,
+  ValidationExceptionResponse
 } from '../model';
 
-import { customInstance } from './mutator/custom-instance';
 
-
-type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
-
-
-  /**
+/**
  * @summary Login user and create token
  */
-export const authLogin = (
-    authLoginRequest: AuthLoginRequest,
- options?: SecondParameter<typeof customInstance>,) => {
-      return customInstance<AuthResource>(
-      {url: `/login`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: authLoginRequest
-    },
-      options);
-    }
+export type authLoginResponse200 = {
+  data: AuthResource
+  status: 200
+}
+
+export type authLoginResponse403 = {
+  data: AuthorizationExceptionResponse
+  status: 403
+}
+
+export type authLoginResponse422 = {
+  data: ValidationExceptionResponse
+  status: 422
+}
+    
+export type authLoginResponseComposite = authLoginResponse200 | authLoginResponse403 | authLoginResponse422;
+    
+export type authLoginResponse = authLoginResponseComposite & {
+  headers: Headers;
+}
+
+export const getAuthLoginUrl = () => {
+
+
   
+
+  return `http://localhost:8080/api/login`
+}
+
+export const authLogin = async (authLoginRequest: AuthLoginRequest, options?: RequestInit): Promise<authLoginResponse> => {
+  
+  const res = await fetch(getAuthLoginUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      authLoginRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: authLoginResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as authLoginResponse
+}
+
+
+
 /**
  * @summary Register new user and create token
  */
-export const authRegister = (
-    authRegisterRequest: AuthRegisterRequest,
- options?: SecondParameter<typeof customInstance>,) => {
-      return customInstance<AuthResource>(
-      {url: `/register`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: authRegisterRequest
-    },
-      options);
-    }
+export type authRegisterResponse201 = {
+  data: AuthResource
+  status: 201
+}
+
+export type authRegisterResponse403 = {
+  data: AuthorizationExceptionResponse
+  status: 403
+}
+
+export type authRegisterResponse422 = {
+  data: ValidationExceptionResponse
+  status: 422
+}
+    
+export type authRegisterResponseComposite = authRegisterResponse201 | authRegisterResponse403 | authRegisterResponse422;
+    
+export type authRegisterResponse = authRegisterResponseComposite & {
+  headers: Headers;
+}
+
+export const getAuthRegisterUrl = () => {
+
+
   
+
+  return `http://localhost:8080/api/register`
+}
+
+export const authRegister = async (authRegisterRequest: AuthRegisterRequest, options?: RequestInit): Promise<authRegisterResponse> => {
+  
+  const res = await fetch(getAuthRegisterUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      authRegisterRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: authRegisterResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as authRegisterResponse
+}
+
+
+
 /**
  * @summary Get list of top musics
  */
-export const musicIndex = (
-    params?: MusicIndexParams,
- options?: SecondParameter<typeof customInstance>,) => {
-      return customInstance<MusicIndex200>(
-      {url: `/musics`, method: 'GET',
-        params
-    },
-      options);
+export type musicIndexResponse200 = {
+  data: MusicIndex200
+  status: 200
+}
+
+export type musicIndexResponse403 = {
+  data: AuthorizationExceptionResponse
+  status: 403
+}
+
+export type musicIndexResponse422 = {
+  data: ValidationExceptionResponse
+  status: 422
+}
+    
+export type musicIndexResponseComposite = musicIndexResponse200 | musicIndexResponse403 | musicIndexResponse422;
+    
+export type musicIndexResponse = musicIndexResponseComposite & {
+  headers: Headers;
+}
+
+export const getMusicIndexUrl = (params?: MusicIndexParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `http://localhost:8080/api/musics?${stringifiedParams}` : `http://localhost:8080/api/musics`
+}
+
+export const musicIndex = async (params?: MusicIndexParams, options?: RequestInit): Promise<musicIndexResponse> => {
   
+  const res = await fetch(getMusicIndexUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: musicIndexResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as musicIndexResponse
+}
+
+
+
 /**
  * @summary Add a new music
  */
-export const musicStore = (
-    addMusicRequest: AddMusicRequest,
- options?: SecondParameter<typeof customInstance>,) => {
-      return customInstance<MusicResource>(
-      {url: `/musics`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: addMusicRequest
-    },
-      options);
-    }
+export type musicStoreResponse201 = {
+  data: MusicResource
+  status: 201
+}
+
+export type musicStoreResponse401 = {
+  data: AuthenticationExceptionResponse
+  status: 401
+}
+
+export type musicStoreResponse403 = {
+  data: AuthorizationExceptionResponse
+  status: 403
+}
+
+export type musicStoreResponse422 = {
+  data: ValidationExceptionResponse
+  status: 422
+}
+    
+export type musicStoreResponseComposite = musicStoreResponse201 | musicStoreResponse401 | musicStoreResponse403 | musicStoreResponse422;
+    
+export type musicStoreResponse = musicStoreResponseComposite & {
+  headers: Headers;
+}
+
+export const getMusicStoreUrl = () => {
+
+
   
+
+  return `http://localhost:8080/api/musics`
+}
+
+export const musicStore = async (addMusicRequest: AddMusicRequest, options?: RequestInit): Promise<musicStoreResponse> => {
+  
+  const res = await fetch(getMusicStoreUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      addMusicRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: musicStoreResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as musicStoreResponse
+}
+
+
+
 /**
  * @summary Get list of pending musics
  */
-export const musicGetPendingMusics = (
-    params?: MusicGetPendingMusicsParams,
- options?: SecondParameter<typeof customInstance>,) => {
-      return customInstance<MusicGetPendingMusics200>(
-      {url: `/musics/pending`, method: 'GET',
-        params
-    },
-      options);
+export type musicGetPendingMusicsResponse200 = {
+  data: MusicGetPendingMusics200
+  status: 200
+}
+
+export type musicGetPendingMusicsResponse401 = {
+  data: AuthenticationExceptionResponse
+  status: 401
+}
+
+export type musicGetPendingMusicsResponse403 = {
+  data: AuthorizationExceptionResponse
+  status: 403
+}
+
+export type musicGetPendingMusicsResponse422 = {
+  data: ValidationExceptionResponse
+  status: 422
+}
+    
+export type musicGetPendingMusicsResponseComposite = musicGetPendingMusicsResponse200 | musicGetPendingMusicsResponse401 | musicGetPendingMusicsResponse403 | musicGetPendingMusicsResponse422;
+    
+export type musicGetPendingMusicsResponse = musicGetPendingMusicsResponseComposite & {
+  headers: Headers;
+}
+
+export const getMusicGetPendingMusicsUrl = (params?: MusicGetPendingMusicsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `http://localhost:8080/api/musics/pending?${stringifiedParams}` : `http://localhost:8080/api/musics/pending`
+}
+
+export const musicGetPendingMusics = async (params?: MusicGetPendingMusicsParams, options?: RequestInit): Promise<musicGetPendingMusicsResponse> => {
   
+  const res = await fetch(getMusicGetPendingMusicsUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: musicGetPendingMusicsResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as musicGetPendingMusicsResponse
+}
+
+
+
 /**
  * @summary Approve music
  */
-export const musicApprove = (
-    musicId: number,
- options?: SecondParameter<typeof customInstance>,) => {
-      return customInstance<MusicResource>(
-      {url: `/musics/approve/${musicId}`, method: 'PATCH'
-    },
-      options);
-    }
+export type musicApproveResponse200 = {
+  data: MusicResource
+  status: 200
+}
+
+export type musicApproveResponse401 = {
+  data: AuthenticationExceptionResponse
+  status: 401
+}
+    
+export type musicApproveResponseComposite = musicApproveResponse200 | musicApproveResponse401;
+    
+export type musicApproveResponse = musicApproveResponseComposite & {
+  headers: Headers;
+}
+
+export const getMusicApproveUrl = (musicId: number,) => {
+
+
   
-export type AuthLoginResult = NonNullable<Awaited<ReturnType<typeof authLogin>>>
-export type AuthRegisterResult = NonNullable<Awaited<ReturnType<typeof authRegister>>>
-export type MusicIndexResult = NonNullable<Awaited<ReturnType<typeof musicIndex>>>
-export type MusicStoreResult = NonNullable<Awaited<ReturnType<typeof musicStore>>>
-export type MusicGetPendingMusicsResult = NonNullable<Awaited<ReturnType<typeof musicGetPendingMusics>>>
-export type MusicApproveResult = NonNullable<Awaited<ReturnType<typeof musicApprove>>>
+
+  return `http://localhost:8080/api/musics/approve/${musicId}`
+}
+
+export const musicApprove = async (musicId: number, options?: RequestInit): Promise<musicApproveResponse> => {
+  
+  const res = await fetch(getMusicApproveUrl(musicId),
+  {      
+    ...options,
+    method: 'PATCH'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: musicApproveResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as musicApproveResponse
+}
+
+
+

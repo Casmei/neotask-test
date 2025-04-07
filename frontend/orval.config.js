@@ -4,12 +4,8 @@ module.exports = {
       mode: "split",
       target: "./api-request/api.ts",
       schemas: "./model",
-      override: {
-        mutator: {
-          path: './api-request/mutator/custom-instance.ts',
-          name: 'customInstance',
-        },
-      },
+      client: 'fetch',
+      baseUrl: 'http://localhost:8080/api',
     },
     input: {
       target: "http://localhost:8080/docs/api.json",

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Music, LogIn, UserPlus, LogOut, ClipboardList, UserCircle } from 'lucide-react';
 import {
@@ -13,10 +12,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 export default function Navbar() {
-  const { user, logout, loginAsMockUser } = useAuth();
   const pathname = usePathname();
+  const { data: session, status } = useSession();
+  if (status === "loading") {
+    return null;
+  }
+  const user = session?.user;
+
+
+  const loginAsMockUser = async (isAdmin: boolean) => {
+    await signIn("credentials", {
+      email: isAdmin ? "admin@example.com" : "user@example.com",
+      password: "password",
+      callbackUrl: "/"
+    });
+  }
 
   return (
     <header className="bg-background border-b sticky top-0 z-10">
@@ -24,60 +37,60 @@ export default function Navbar() {
         <div className="flex items-center space-x-2">
           <Music className="h-6 w-6 text-primary" />
           <Link href="/" className="text-xl font-bold">
-            Music App
+            Neotask
           </Link>
         </div>
 
         <nav className="hidden md:flex items-center space-x-6">
           <Link
             href="/"
-            className={`hover:text-primary transition-colors ${
-              pathname === "/" ? "text-primary font-medium" : ""
-            }`}
+            className={`hover:text-primary transition-colors ${pathname === "/" ? "text-primary font-medium" : ""
+              }`}
           >
-            Home
+            Principal
           </Link>
-          {user?.isAdmin === "1" && (
+          {user?.isAdmin && (
             <Link
               href="/admin/pending"
-              className={`hover:text-primary transition-colors ${
-                pathname === "/admin/pending" ? "text-primary font-medium" : ""
-              }`}
+              className={`hover:text-primary transition-colors ${pathname === "/admin/pending" ? "text-primary font-medium" : ""
+                }`}
             >
-              Pending Approval
+              Pendentes de aprovação
             </Link>
           )}
         </nav>
 
         <div className="flex items-center space-x-2">
-          {user ? (
+          {status === "authenticated" ? (
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
                     <UserCircle className="h-4 w-4 mr-2" />
-                    {user.name}
+                    {user?.name}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {user.isAdmin === "1" && (
+                  {user?.isAdmin && (
                     <DropdownMenuItem asChild>
                       <Link href="/admin/pending">
                         <ClipboardList className="h-4 w-4 mr-2" />
-                        Pending Approval
+                        Pendentes de aprovação
                       </Link>
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem onClick={logout}>
+
+                  <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
                     <LogOut className="h-4 w-4 mr-2" />
-                    Logout
+                    Sair
                   </DropdownMenuItem>
+
                 </DropdownMenuContent>
               </DropdownMenu>
             </>
-          ) : (
+          ) : status === "unauthenticated" ? (
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -89,11 +102,11 @@ export default function Navbar() {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Quick Login</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => loginAsMockUser(true)}>
-                    Login as Admin
+                  <DropdownMenuItem onClick={async () => await loginAsMockUser(true)}>
+                    Login como Admin
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => loginAsMockUser(false)}>
-                    Login as Regular User
+                  <DropdownMenuItem onClick={async () => await loginAsMockUser(false)}>
+                    Login como Usuário regular
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -106,31 +119,32 @@ export default function Navbar() {
               <Button size="sm" asChild>
                 <Link href="/register">
                   <UserPlus className="h-4 w-4 mr-2" />
-                  Register
+                  Cadastro
                 </Link>
               </Button>
             </>
-          )}
+          ) : null}
         </div>
       </div>
-      
+
       {/* Mobile navigation for admin */}
-      {user?.isAdmin === "1" && (
-        <div className="md:hidden border-t">
-          <div className="container mx-auto px-4 py-2">
-            <Link
-              href="/admin/pending"
-              className={`flex items-center py-2 ${
-                pathname === "/admin/pending" ? "text-primary font-medium" : ""
-              }`}
-            >
-              <ClipboardList className="h-4 w-4 mr-2" />
-              Pending Music Approval
-            </Link>
+      {
+        user?.isAdmin && (
+          <div className="md:hidden border-t">
+            <div className="container mx-auto px-4 py-2">
+              <Link
+                href="/admin/pending"
+                className={`flex items-center py-2 ${pathname === "/admin/pending" ? "text-primary font-medium" : ""
+                  }`}
+              >
+                <ClipboardList className="h-4 w-4 mr-2" />
+                Pendentes de aprovação
+              </Link>
+            </div>
           </div>
-        </div>
-      )}
-    </header>
+        )
+      }
+    </header >
   );
 }
 

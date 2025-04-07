@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import MusicCard from "./music-card"
 import Pagination from "./pagination"
+import { musicIndex } from "@/api-request/api"
 
 interface Music {
   id: string
@@ -41,72 +42,29 @@ export default function MusicList() {
     setError("")
 
     try {
-      // Try to fetch from the API
-      const response = await fetch(`http://localhost:8080/api/musics?page=${page}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const response = await musicIndex({ page, orderBy: "views" }, {
+        next: {
+          tags: ['musics']
+        }
       }).catch((err) => {
         console.log("Network error:", err)
         return null
       })
 
-      // If the fetch failed or returned an error status, use mock data
-      if (!response || !response.ok) {
-        console.log("Using mock data due to API unavailability")
-
-        // Mock data for development/preview
-        const mockData: MusicResponse = {
-          data: [
-            {
-              id: "1",
-              title: "Mock Music 1 - API Unavailable",
-              youtube_id: "dQw4w9WgXcQ",
-              formatted_views: "10M",
-              thumbnail: "/placeholder.svg?height=200&width=200",
-              url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            },
-            {
-              id: "2",
-              title: "Mock Music 2 - API Unavailable",
-              youtube_id: "dQw4w9WgXcQ",
-              formatted_views: "5M",
-              thumbnail: "/placeholder.svg?height=200&width=200",
-              url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            },
-            {
-              id: "3",
-              title: "Mock Music 3 - API Unavailable",
-              youtube_id: "dQw4w9WgXcQ",
-              formatted_views: "2M",
-              thumbnail: "/placeholder.svg?height=200&width=200",
-              url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            },
-          ],
-          meta: {
-            total: "3",
-            current_page: page.toString(),
-            per_page: "10",
-            last_page: "1",
-          },
-        }
-
-        setMusics(mockData.data)
-        setMeta(mockData.meta)
-        setCurrentPage(page)
+      if (!response || response.status !== 200) {
+        setError("Failed to load music list. Please try again later.")
+        setMusics([])
+        setMeta(null)
         return
       }
 
-      const data: MusicResponse = await response.json()
+      const data = response.data as MusicResponse
+
       setMusics(data.data)
       setMeta(data.meta)
-      setCurrentPage(Number.parseInt(data.meta.current_page))
+      setCurrentPage(Number.parseInt(data.meta.current_page.toString()))
     } catch (err) {
       console.error("Error fetching musics:", err)
-      setError("Failed to load music list. Please try again later.")
-
-      // Set empty data instead of leaving previous data
       setMusics([])
       setMeta(null)
     } finally {

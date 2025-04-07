@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ExternalLink, Eye } from "lucide-react"
 
 interface Music {
-  id: string
+  id: number
   title: string
   youtube_id: string
   formatted_views: string

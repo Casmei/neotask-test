@@ -1,25 +1,43 @@
-// custom-instance.ts
+const baseURL = 'http://localhost:8080/api';
 
-import Axios, { AxiosError, AxiosRequestConfig } from 'axios';
-
-export const AXIOS_INSTANCE = Axios.create({ baseURL: 'http://localhost:8080/api' }); // use your own URL here or environment variable
-
-// add a second `options` argument here if you want to pass extra options to each generated query
-export const customInstance = <T>(
-    config: AxiosRequestConfig,
-    options?: AxiosRequestConfig,
+export const customInstance = async <T>(
+    url: string,
+    {
+        method,
+        params,
+        body,
+        tags,
+        cache = 'no-store',
+        headers, // <- importante!
+    }: {
+        method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+        params?: Record<string, any>;
+        body?: any;
+        tags?: string[];
+        cache?: RequestCache;
+        headers?: HeadersInit;
+    }
 ): Promise<T> => {
-    const source = Axios.CancelToken.source();
-    const promise = AXIOS_INSTANCE({
-        ...config,
-        ...options,
-        cancelToken: source.token,
-    }).then(({ data }) => data);
+    let targetUrl = `${baseURL}${url}`;
 
-    // @ts-ignore
-    promise.cancel = () => {
-        source.cancel('Query was cancelled');
-    };
+    if (params) {
+        targetUrl += '?' + new URLSearchParams(params).toString();
+    }
 
-    return promise;
+    const response = await fetch(targetUrl, {
+        method,
+        body: body ? JSON.stringify(body) : undefined,
+        headers: {
+            'Content-Type': 'application/json',
+            ...(headers || {}), // <- merge com os headers customizados
+        },
+        cache,
+        next: tags ? { tags } : undefined,
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
 };

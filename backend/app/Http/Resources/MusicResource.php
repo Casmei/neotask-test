@@ -16,6 +16,9 @@ class MusicResource extends JsonResource
     public function toArray($request): array
     {
         return [
+            /**
+             * @var int
+             */
             "id" => $this->resource->getId(),
             "title" => $this->resource->getTitle(),
             "youtube_id" => $this->resource->getYoutubeId(),

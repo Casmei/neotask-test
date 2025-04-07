@@ -9,6 +9,8 @@ export const loginAction = async (data: FormData) => {
         await signIn('credentials', {
             email: data.get('email') as string,
             password: data.get('password') as string,
+            redirect: true,
+            redirectTo: "/"
         });
     } catch (error) {
         if (error instanceof AuthError) {

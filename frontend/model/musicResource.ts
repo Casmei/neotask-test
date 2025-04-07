@@ -6,7 +6,7 @@
  */
 
 export interface MusicResource {
-  id: string;
+  id: number;
   title: string;
   youtube_id: string;
   formatted_views: string;
