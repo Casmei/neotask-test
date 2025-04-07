@@ -28,6 +28,9 @@ class AuthResource extends JsonResource
             "id" => $this->getId(),
             "name" => $this->getName(),
             "email" => $this->getEmail(),
+            /**
+             * @var bool
+             */
             "isAdmin" => $this->getIsAdmin(),
             "token" => $this->token,
             "message" => "Registro realizado com sucesso",
