@@ -1,28 +1,42 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
-import { useRouter } from "next/navigation";
+import { musicGetPendingMusics } from "@/api-request/api";
 import PendingMusicList from "@/components/pending-music-list";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, ShieldAlert } from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import { auth } from "@/config/auth";
 
-export default function PendingMusicsPage() {
-  const router = useRouter();
-  const [error, setError] = useState("");
+async function getData(page: number) {
+  const token = await auth();
+  return musicGetPendingMusics({ page, orderBy: "views" }, {
+    headers: {
+      Authorization: `Bearer ${token?.accessToken}`
+    },
+    next: {
+      tags: ['pendingMusic']
+    },
+    cache: 'force-cache',
+  })
+}
+
+type Props = {
+  params: Promise<{
+    page: string
+  }>
+}
+
+export default async function PendingMusicsPage({ params }: Props) {
+  const { page = "1" } = await params;
+  const teste = await getData(+page);
+
+  if (teste.status !== 200) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <h1 className="text-3xl font-bold">Erro ao carregar músicas pendentes</h1>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Músicas pendentes de aprovação</h1>
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      <PendingMusicList onError={setError} />
+      <PendingMusicList pendingMusics={teste.data} />
     </div>
   );
 }
-

@@ -1,15 +1,14 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Check } from 'lucide-react'
 import MusicCard from "./music-card"
 import Pagination from "./pagination"
-import { musicGetPendingMusics } from "@/api-request/api"
 import { useSession } from "next-auth/react"
 import { approveMusicServerAction } from "@/action/approve-music"
+import { MusicGetPendingMusics200 } from "@/model"
+import { useRouter } from "next/navigation"
+import { Button } from "./ui/button"
 
 interface Music {
   id: number
@@ -32,64 +31,16 @@ interface MusicResponse {
   meta: PaginationMeta
 }
 
-export default function PendingMusicList({
-  onError,
-}: {
-  onError: (error: string) => void
-}) {
-  const { data: session, status } = useSession()
-  const [pendingMusics, setPendingMusics] = useState<Music[]>([])
-  const [meta, setMeta] = useState<PaginationMeta | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [currentPage, setCurrentPage] = useState(1)
+type Props = {
+  pendingMusics: MusicGetPendingMusics200
+}
 
-  const fetchPendingMusics = async (page = 1) => {
-    setLoading(true)
-
-    try {
-      const response = await musicGetPendingMusics({ page, orderBy: "views" }, {
-        headers: {
-          Authorization: `Bearer ${session?.accessToken}`
-        },
-        next: {
-          tags: ['pendingMusic']
-        },
-
-      }).catch((err) => {
-        console.log("Network error:", err)
-        return null
-      })
-
-      if (!response || response.status !== 200) {
-        onError("Failed to load music list. Please try again later.")
-        setPendingMusics([])
-        setMeta(null)
-        return
-      }
-
-      const data = response.data as MusicResponse
-
-      setPendingMusics(data.data)
-      setMeta(data.meta)
-      setCurrentPage(Number.parseInt(data.meta.current_page.toString()))
-    } catch (err) {
-      console.error("Error fetching musics:", err)
-      setPendingMusics([])
-      setMeta(null)
-    } finally {
-      setLoading(false)
-    }
-  };
-
-  useEffect(() => {
-    if (session?.accessToken) {
-      fetchPendingMusics()
-    }
-  }, [session])
-
-  const handlePageChange = (page: number) => {
-    fetchPendingMusics(page)
+export default function PendingMusicList({ pendingMusics }: Props) {
+  const onError = (message: string) => {
+    console.error(message)
   }
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
   const approveMusic = async (musicId: number) => {
     if (status === "unauthenticated" || !session?.accessToken) {
@@ -105,37 +56,20 @@ export default function PendingMusicList({
     }
   }
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i}>
-            <CardContent className="p-4">
-              <div className="flex space-x-4">
-                <Skeleton className="h-24 w-24 rounded-md" />
-                <div className="space-y-2 flex-1">
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-4 w-1/4" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    )
+  const handlePageChange = async (page: number) => {
+    router.push(`/admin/pending?page=${page}`)
   }
 
   return (
     <div className="space-y-6">
-      {pendingMusics.length === 0 ? (
+      {pendingMusics.data.length === 0 ? (
         <div className="text-center py-10">
           <p className="text-muted-foreground">No pending music found</p>
         </div>
       ) : (
         <>
           <div className="space-y-4">
-            {pendingMusics.map((music) => (
+            {pendingMusics.data.map((music) => (
               <Card key={music.id} className="overflow-hidden">
                 <CardContent className="p-0">
                   <div className="flex flex-col sm:flex-row">
@@ -160,10 +94,10 @@ export default function PendingMusicList({
             ))}
           </div>
 
-          {meta && (
+          {pendingMusics.meta.total > pendingMusics.meta.per_page && (
             <Pagination
-              currentPage={currentPage}
-              totalPages={Number.parseInt(meta.last_page)}
+              currentPage={+pendingMusics.meta.current_page}
+              totalPages={Number.parseInt(pendingMusics.meta.last_page)}
               onPageChange={handlePageChange}
             />
           )}
@@ -172,4 +106,3 @@ export default function PendingMusicList({
     </div>
   )
 }
-

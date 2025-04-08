@@ -39,8 +39,10 @@ A interface está localizada na pasta frontend, utilizando Next.js com suporte a
 
 ```bash
 cd frontend
-npm install
+npm install --force
 npm run dev
+
+npx auth secret
 ```
 ---
 
