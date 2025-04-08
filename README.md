@@ -30,6 +30,12 @@ cp .env.example .env
 docker compose up
 ```
 
+### Rodando os testes
+
+```bash
+docker exec -it laravel_app php artisan test
+```
+
 ---
 ## 🌐 Frontend (Next)
 
